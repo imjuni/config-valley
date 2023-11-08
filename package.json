@@ -1,0 +1,123 @@
+{
+  "name": "config-valley",
+  "version": "1.0.0",
+  "description": "configuration reading package",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "ctix": "ctix build --config .configs/.ctirc",
+    "ctix-rm": "ctix remove --config .configs/.ctirc --force-yes --remove-backup",
+    "debug": "node --inspect-brk -r ts-node/register src/populate.ts",
+    "build": "pnpm run clean && tsc --incremental --noEmit --project tsconfig.json --tsBuildInfoFile .tsbuildinfo",
+    "dts": "tsc -p tsconfig.dts.json",
+    "dts-alias": "tsc-alias -p tsconfig.dts.json",
+    "dts-gen": "rollup --config .configs/rollup.config.mjs",
+    "dts-pack": "run-s dts dts-alias dts-gen dts-rm",
+    "dts-rm": "rimraf dist/types/origin",
+    "esbuild-cjs": "FORMAT=cjs node .configs/esbuild.mjs",
+    "esbuild-esm": "FORMAT=esm node .configs/esbuild.mjs",
+    "bundle-pack": "run-p esbuild-cjs esbuild-esm dts-pack",
+    "bundle": "run-s clean ctix bundle-pack ctix-rm",
+    "test": "vitest --run --coverage",
+    "lint": "eslint --cache .",
+    "lint-staged": "lint-staged",
+    "pub": "pnpm run bundle && cross-env RELEASE_MODE=true pnpm publish --registry http://localhost:8901",
+    "unpub": "pnpm unpublish $npm_package_name@$npm_package_version --registry http://localhost:8901 --force",
+    "pub:prod": "pnpm run bundle && cross-env RELEASE_MODE=true pnpm publish --access=public",
+    "dd": "deps-diff md -d prod -d dev --title-list-type '*' --deps-list-type '*' --content-list-type '*'",
+    "prepublishOnly": "node prepublish.cjs",
+    "prepare": "husky install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/imjuni/config-valley.git"
+  },
+  "keywords": [
+    "library",
+    "config",
+    "jsonc",
+    "json5",
+    "yaml",
+    "toml"
+  ],
+  "author": "ByungJoon Lee",
+  "license": "MIT",
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.mjs",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "require": {
+        "default": "./dist/cjs/index.cjs",
+        "types": "./dist/types/index.d.ts"
+      },
+      "import": {
+        "default": "./dist/esm/index.mjs",
+        "types": "./dist/types/index.d.ts"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "bugs": {
+    "url": "https://github.com/imjuni/config-valley/issues"
+  },
+  "homepage": "https://github.com/imjuni/config-valley#readme",
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@tsconfig/node18": "^18.2.4",
+    "@types/node": "^22.2.0",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitest/coverage-v8": "^2.0.5",
+    "cross-env": "^7.0.3",
+    "ctix": "^2.6.1",
+    "deps-diff": "^1.0.2",
+    "esbuild": "0.23.0",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-airbnb-typescript": "^18.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsdoc": "^50.2.1",
+    "eslint-plugin-prefer-arrow": "^1.2.3",
+    "eslint-plugin-prettier": "^5.2.1",
+    "husky": "^9.1.4",
+    "lint-staged": "^15.2.9",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^3.3.3",
+    "prettier-eslint": "^16.3.0",
+    "prettier-plugin-organize-imports": "^4.0.0",
+    "read-pkg": "^5.2.0",
+    "rimraf": "^6.0.1",
+    "rollup": "^4.20.0",
+    "rollup-plugin-dts": "^6.1.1",
+    "ts-node": "^10.9.2",
+    "tsc-alias": "^1.8.10",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.4",
+    "vite-tsconfig-paths": "^4.3.2",
+    "vitest": "^2.0.5"
+  },
+  "dependencies": {
+    "comment-json": "^4.2.5",
+    "json5": "^2.2.3",
+    "jsonc-parser": "^3.3.1",
+    "my-easy-fp": "^0.22.0",
+    "pathe": "^1.1.2",
+    "smol-toml": "^1.3.0",
+    "yaml": "^2.5.0"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "cross-env NODE_ENV=production eslint --cache"
+    ],
+    "*.{js,jsx,ts,tsx},*.json,.{eslintrc.cjs,prettierrc}": [
+      "cross-env NODE_ENV=production prettier --ignore-path .eslintignore --parser json --write"
+    ]
+  }
+}

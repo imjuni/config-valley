@@ -1,0 +1,24 @@
+import { CE_CONFIG_SOURCE } from '#/common/const-enum/CE_CONFIG_SOURCE';
+import { AbstractJsonParser } from '#/common/parser/AbstractJsonParser';
+import { parse, stringify } from 'yaml';
+
+export class YamlParser extends AbstractJsonParser {
+  constructor() {
+    super(CE_CONFIG_SOURCE.YAML);
+  }
+
+  override parse<T>(buf: Buffer | string): T {
+    const stringifiedBuf = typeof buf !== 'string' ? buf.toString() : buf;
+    const parsed = parse(stringifiedBuf) as T;
+    return parsed;
+  }
+
+  override assign<T>(_target: object, ..._sources: object[]): T {
+    throw new Error(`Not support assign function in ${YamlParser.constructor.name}`);
+  }
+
+  override stringify(data: unknown): string {
+    const stringified = stringify(data);
+    return stringified;
+  }
+}
